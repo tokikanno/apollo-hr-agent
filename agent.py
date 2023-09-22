@@ -1,5 +1,6 @@
 from typing import Optional
 from functools import cached_property
+from datetime import datetime
 
 import requests
 from pyquery import PyQuery as pq
@@ -108,3 +109,23 @@ class ApolloAgent:
         keys = sorted(self.session.cookies.get_dict().keys())
         print(f"total {len(keys)} keys")
         print(", ".join(keys))
+
+    def get_employee_calendar(self, year: int = None, month: int = None):
+        now = datetime.now()
+
+        year = year or now.year
+        month = month or now.month
+
+        resp = self.session.get(
+            "https://pt-be.mayohr.com/api/EmployeeCalendars/scheduling",
+            params={
+                "year": year,
+                "month": month,
+            },
+            headers={
+                "Actioncode": "Default",
+                "Functioncode": "PersonalShiftSchedule",
+            },
+        )
+
+        return resp.json()
