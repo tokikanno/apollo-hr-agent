@@ -1,3 +1,4 @@
+#!/bin/env python
 from typing import Optional
 from json import dumps, loads
 from random import randint
@@ -25,8 +26,16 @@ def _wait_for_datetime_passed(target: datetime, sleep_sec: int = 1):
         sleep(sleep_sec)
 
 
-def _print_json(data: dict, indent=2):
-    print(dumps(data, indent=indent, ensure_ascii=False))
+def print_json(data: dict, indent=2):
+    def _default(obj):
+        if isinstance(obj, datetime):
+            return obj.isoformat()
+
+        raise TypeError(f"can not handle {obj} (type=type(obj))")
+
+    print(
+        dumps(data, indent=indent, ensure_ascii=False, sort_keys=True, default=_default)
+    )
 
 
 @app.command()
@@ -71,11 +80,11 @@ def _do_auto_punch_loop(
 
     _wait_for_datetime_passed(in_time_dt)
     print(f"auto punching in @ {datetime.now()}")
-    _print_json(agent.punch_in())
+    print_json(agent.punch_in())
 
     _wait_for_datetime_passed(out_time_dt)
     print(f"auto punching out @ {datetime.now()}")
-    _print_json(agent.punch_out())
+    print_json(agent.punch_out())
 
 
 def check_is_workay_and_auto_punch(jitter: int = 60, force: bool = False):
@@ -116,7 +125,7 @@ def test():
     print(agent.get_sys_date())
     print(agent.get_employee_role())
     # print(get_workday_calendars())
-    print(get_today_worday_calendar())
+    print_json(get_today_worday_calendar())
 
 
 def prepare_login_agent():
