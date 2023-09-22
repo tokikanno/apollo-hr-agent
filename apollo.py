@@ -138,19 +138,17 @@ def get_workday_calendars() -> dict[str, dict]:
     calendars = agent.get_employee_calendar()["Data"]["Calendars"]
     result_map: dict[str, dict] = {}
 
+    def _parse_as_gmt_8_dt(dt_str: Optional[str]):
+        if not dt_str:
+            return None
+
+        return datetime.fromisoformat(dt_str).astimezone(GMT_8_TZ).replace(tzinfo=None)
+
     for c in calendars:
         cal = {
             "date": c["Date"].split("T")[0],
-            "work_on_time": datetime.fromisoformat(c["ShiftSchedule"]["WorkOnTime"])
-            .astimezone(GMT_8_TZ)
-            .replace(tzinfo=None)
-            if c["ShiftSchedule"]["WorkOnTime"]
-            else None,
-            "work_off_time": datetime.fromisoformat(c["ShiftSchedule"]["WorkOffTime"])
-            .astimezone(GMT_8_TZ)
-            .replace(tzinfo=None)
-            if c["ShiftSchedule"]["WorkOffTime"]
-            else None,
+            "work_on_time": _parse_as_gmt_8_dt(c["ShiftSchedule"]["WorkOnTime"]),
+            "work_off_time": _parse_as_gmt_8_dt(c["ShiftSchedule"]["WorkOffTime"]),
         }
 
         cal["is_work_day"] = bool(cal["work_on_time"] and cal["work_off_time"])
