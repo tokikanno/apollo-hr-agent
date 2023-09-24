@@ -123,20 +123,19 @@ def check_is_workay_and_auto_punch(jitter: int = 60, force: bool = False):
 
 @app.command()
 def auto_punch(
-    auto_work_day_check: bool = True,
-    jitter: int = typer.Option(60, help="random jitter seconds"),
+    jitter: int = typer.Option(60, help="random jitter seconds"), force: bool = False
 ):
     while True:
         now = datetime.now()
 
-        if now.hour >= 8:
-            print(f"if passed 8AM, auto punch will only be effective from next morning")
-            now += timedelta(days=1)
+        if now.hour >= 7 and not force:
+            print(f"if passed 7AM, auto punch will only be effective from next morning")
+        else:
+            check_is_workay_and_auto_punch(jitter=jitter, force=force)
 
         _wait_for_datetime_passed(
-            datetime(now.year, now.month, now.day, 7), sleep_sec=60
+            datetime(now.year, now.month, now.day, 7) + timedelta(days=1)
         )
-        check_is_workay_and_auto_punch(jitter=jitter, force=not auto_work_day_check)
 
 
 @app.command()
