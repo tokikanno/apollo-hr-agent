@@ -16,13 +16,32 @@ app = typer.Typer()
 agent: ApolloAgent = None
 auth_d: dict = None
 
+AUTO_WAIT_INTERVAL_ENTRIES = (
+    (7200, 3600),
+    (3600, 1800),
+    (600, 300),
+    (60, 30),
+    (0, 1),
+)
 
-def _wait_for_datetime_passed(target: datetime, sleep_sec: int = 1):
-    print(f"waiting for {target} with sleep interval {sleep_sec}s ...")
+
+def _get_auto_wait_interval(target: datetime):
+    time_delta_to_target = target - datetime.now()
+    total_secs = time_delta_to_target.total_seconds()
+    for d, s in AUTO_WAIT_INTERVAL_ENTRIES:
+        if total_secs >= d:
+            return s
+
+    return 0
+
+
+def _wait_for_datetime_passed(target: datetime):
+    print(f"[{datetime.now()}] waiting for {target}...")
     while True:
         if datetime.now() >= target:
             break
 
+        sleep_sec = _get_auto_wait_interval(target=target)
         sleep(sleep_sec)
 
 
