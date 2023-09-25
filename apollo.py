@@ -134,7 +134,7 @@ def auto_punch(
             check_is_workay_and_auto_punch(jitter=jitter, force=force)
 
         _wait_for_datetime_passed(
-            datetime(now.year, now.month, now.day, 7) + timedelta(days=1)
+            datetime(now.year, now.month, now.day, 6, 59) + timedelta(days=1)
         )
 
 
