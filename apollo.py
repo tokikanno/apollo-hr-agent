@@ -9,7 +9,7 @@ import typer
 
 from agent import ApolloAgent
 
-GMT_8_TZ: timezone = timezone(timedelta(hours=8))
+LOCAL_TZ: timezone = datetime.now().astimezone().tzinfo
 
 app = typer.Typer()
 
@@ -160,7 +160,7 @@ def get_workday_calendars() -> dict[str, dict]:
         if not dt_str:
             return None
 
-        return datetime.fromisoformat(dt_str).astimezone(GMT_8_TZ).replace(tzinfo=None)
+        return datetime.fromisoformat(dt_str).astimezone(LOCAL_TZ).replace(tzinfo=None)
 
     for c in calendars:
         cal = {
