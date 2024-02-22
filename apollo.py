@@ -11,7 +11,7 @@ from agent import ApolloAgent
 
 LOCAL_TZ: timezone = datetime.now().astimezone().tzinfo
 
-app = typer.Typer()
+app = typer.Typer(no_args_is_help=True)
 
 agent: ApolloAgent = None
 auth_d: dict = None
@@ -142,8 +142,8 @@ def auto_punch(
 def test():
     print(agent.get_sys_date())
     print(agent.get_employee_role())
-    # print(get_workday_calendars())
-    print_json(get_today_worday_calendar())
+    print_json(get_workday_calendars())
+    # print_json(get_today_worday_calendar())
 
 
 def prepare_login_agent():
