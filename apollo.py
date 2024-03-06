@@ -188,21 +188,24 @@ def get_today_worday_calendar():
 
 
 @app.callback()
-def main(ctx: typer.Context, config: str = typer.Option(None, help="config username")):
+def main(
+    ctx: typer.Context, config: str = typer.Option("config", help="config username")
+):
     global auth_d
 
     if ctx.invoked_subcommand == "init":
         return
 
-    if not config:
-        print("please provide a user config name via --config option")
-        print("or create via init sub command if you don't have one")
-        raise typer.Exit(code=-1)
+    cfg_fname: str = f"{config}.json"
 
     try:
-        auth_d = loads(open(f"{config}.json").read())
+        auth_d = loads(open(cfg_fname).read())
     except IOError as e:
         print(e)
+        print(f"fail loading {cfg_fname}")
+        print()
+        print("please provide a user config name via --config option")
+        print("or create via init sub command if you don't have one")
         raise typer.Exit(code=-1)
 
     if ctx.invoked_subcommand != "auto-punch":
