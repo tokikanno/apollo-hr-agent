@@ -1,9 +1,23 @@
 from typing import Optional
-from functools import cached_property
+from functools import cached_property, wraps
 from datetime import datetime
 
 import requests
 from pyquery import PyQuery as pq
+
+
+def _login_required(msg="plz login first"):
+    def wrapper(fn):
+        @wraps(fn)
+        def _wrapped(self, *args, **kwargs):
+            if not self.auth_d:
+                raise ValueError(msg)
+
+            return fn(self, *args, **kwargs)
+
+        return _wrapped
+
+    return wrapper
 
 
 class ApolloAgent:
@@ -49,10 +63,8 @@ class ApolloAgent:
         # print(dumps(self.auth_d, indent=2))
         return self.auth_d
 
+    @_login_required("call get_auth_token() first#")
     def check_ticket(self):
-        if not self.auth_d:
-            raise ValueError("call get_auth_token() first")
-
         code = self.auth_d["code"]
         resp = self.session.get(
             f"https://linkup-be.mayohr.com/api/auth/checkticket?code={code}"
@@ -74,6 +86,7 @@ class ApolloAgent:
         )
         return resp.json()
 
+    @_login_required()
     def punch(self, attendance_type: int, override: bool = False):
         """
         attendance_type:
@@ -82,9 +95,6 @@ class ApolloAgent:
 
         override: 蓋過前一次打卡紀錄（只有下班卡可以）
         """
-        if not self.auth_d:
-            raise ValueError("no login data")
-
         resp = self.session.post(
             "https://pt-be.mayohr.com/api/checkIn/punch/web",
             headers={
@@ -110,6 +120,7 @@ class ApolloAgent:
         print(f"total {len(keys)} keys")
         print(", ".join(keys))
 
+    @_login_required()
     def get_employee_calendar(self, year: int = None, month: int = None):
         now = datetime.now()
 
